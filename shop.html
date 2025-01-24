@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #cart-container {
+            margin-top: 20px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .cart-item img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        .cart-item p {
+            margin: 0 10px;
+        }
+        .cart-item button {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shopping Cart</h1>
+    <div id="cart-container"></div>
+    <div id="summary">
+        <p id="total-items">Total Items: 0</p>
+        <p id="total-cost">Total Cost: $0.00</p>
+    </div>
+    <script>
+        // Sample structure of cart items
+        let cart = [
+            { id: 1, name: "Plant A", price: 10, quantity: 1 },
+            { id: 2, name: "Plant B", price: 15, quantity: 2 },
+            { id: 3, name: "Plant C", price: 20, quantity: 1 },
+        ];
+
+        // Function to render the cart
+        function renderCart() {
+            const cartContainer = document.getElementById("cart-container");
+            cartContainer.innerHTML = ""; // Clear existing content
+
+            cart.forEach((item) => {
+                const itemElement = document.createElement("div");
+                itemElement.className = "cart-item";
+                itemElement.innerHTML = `
+                    <img src="thumbnail-${item.id}.jpg" alt="${item.name}" class="cart-item-thumbnail">
+                    <p class="cart-item-name">${item.name}</p>
+                    <p class="cart-item-price">$${item.price}</p>
+                    <p class="cart-item-quantity">Quantity: ${item.quantity}</p>
+                    <button class="increase-btn" data-id="${item.id}">+</button>
+                    <button class="decrease-btn" data-id="${item.id}">-</button>
+                    <button class="delete-btn" data-id="${item.id}">Delete</button>
+                `;
+                cartContainer.appendChild(itemElement);
+            });
+
+            updateCartSummary();
+        }
+
+        // Function to update the cart summary
+        function updateCartSummary() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalCost = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+            document.getElementById("total-items").innerText = `Total Items: ${totalItems}`;
+            document.getElementById("total-cost").innerText = `Total Cost: $${totalCost.toFixed(2)}`;
+        }
+
+        // Event listener for cart actions
+        document.getElementById("cart-container").addEventListener("click", (event) => {
+            const target = event.target;
+            const itemId = parseInt(target.dataset.id);
+
+            if (target.classList.contains("increase-btn")) {
+                // Increase quantity
+                const item = cart.find((item) => item.id === itemId);
+                if (item) {
+                    item.quantity += 1;
+                }
+            } else if (target.classList.contains("decrease-btn")) {
+                // Decrease quantity
+                const item = cart.find((item) => item.id === itemId);
+                if (item && item.quantity > 1) {
+                    item.quantity -= 1;
+                } else if (item && item.quantity === 1) {
+                    // Prompt before deletion
+                    if (confirm("Do you want to remove this item from the cart?")) {
+                        cart = cart.filter((item) => item.id !== itemId);
+                    }
+                }
+            } else if (target.classList.contains("delete-btn")) {
+                // Delete item
+                cart = cart.filter((item) => item.id !== itemId);
+            }
+
+            renderCart();
+        });
+
+        // Initial render
+        renderCart();
+    </script>
+</body>
+</html>
